@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	_ "github.com/Ellan98/ding-water-service/common"
+)
 
 func init() {
 
