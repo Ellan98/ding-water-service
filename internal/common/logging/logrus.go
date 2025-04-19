@@ -1,8 +1,11 @@
 package logging
 
+import "fmt"
+
 func Init() {
 	//SetFormatter(logrus.Stand)
-	logrus.Debug()
+	//logrus.Debug()
+	fmt.Println("hello i`m from common")
 }
 
 //func SetFormatter(logger *logrus.Logger) {

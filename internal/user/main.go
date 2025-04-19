@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/Ellan98/ding-water-server/common/config"
+	"github.com/Ellan98/ding-water-service/common/config"
+	"github.com/Ellan98/ding-water-service/common/logging"
 )
 
 func init() {
-	if err := config.NewViperConfig(); err != nil {
-
-	}
+	logging.Init()
+	config.NewViperConfig()
 }
 
 func main() {

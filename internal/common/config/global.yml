@@ -1,5 +1,8 @@
-user:
-  service-name: user
-  server-to-run: http
-  http-addr: 127.0.0.1:8181
-  grpc-addr: 127.0.0.1:5001
+  user:
+    service-name: user
+    server-to-run: http
+    http-addr: 127.0.0.1:8181
+    grpc-addr: 127.0.0.1:5001
+
+
+  deepSeek-key: "${DING_WATER_SERVICE_DEEPSEEK_KEY}"

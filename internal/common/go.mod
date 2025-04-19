@@ -1,4 +1,4 @@
-module github.com/Ellan98/ding-water-server/common
+module github.com/Ellan98/ding-water-service/common
 
 go 1.24.1
 
