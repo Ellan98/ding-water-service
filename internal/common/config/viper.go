@@ -20,10 +20,11 @@ func init() {
 var once sync.Once
 
 /**
-
- */
+命名返回值(err error ) 变量err的作用域覆盖整个函数体
+*/
 
 func NewViperConfig() (err error) {
+	//once.Do 保证内部的函数只执行一次，且执行过程是线程安全的。
 	once.Do(func() {
 		err = newViperConfig()
 	})
@@ -46,12 +47,13 @@ func newViperConfig() error {
 
 func getRelativePathFromCaller() (relPath string, err error) {
 	callerPwd, err := os.Getwd()
+	fmt.Printf("current path %s\n", callerPwd)
 	if err != nil {
 		return
 	}
 	_, here, _, _ := runtime.Caller(0)
 	relPath, err = filepath.Rel(callerPwd, filepath.Dir(here))
-	fmt.Printf("caller from %s, here: %s ,relpath: %s", callerPwd, here, relPath)
+	fmt.Printf("caller from %s, here: %s ,relpath: %s\n", callerPwd, here, relPath)
 	return
 
 }
