@@ -1,5 +1,4 @@
 package query
 
-func GetDeepSeekAnswer() {
-
+type GetDeepSeekAnswer interface {
 }
