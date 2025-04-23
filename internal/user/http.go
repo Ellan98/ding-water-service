@@ -10,11 +10,19 @@ import (
 	"os"
 
 	"github.com/Ellan98/ding-water-service/user/app"
+	"github.com/Ellan98/ding-water-service/user/app/command/query"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type HTTPServer struct {
 	app app.Application
+}
+
+func (h HTTPServer) GetDeepSeekAnswer(c *gin.Context) {
+	//TODO
+	logrus.Info("To do somethings")
+	h.app.Queries.GetDeepSeekAnswer.Handle(c, query.GetDeepSeekAnswer{Problem: "test"})
 }
 
 type Request struct {

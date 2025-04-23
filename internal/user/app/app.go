@@ -12,5 +12,5 @@ type Application struct {
 }
 
 type Queries struct {
-	GetDeepSeekAnswer query.GetDeepSeekAnswer
+	GetDeepSeekAnswer query.GetDeepSeekAnswerHandler
 }
