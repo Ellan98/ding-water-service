@@ -22,6 +22,11 @@ func init() {
 func main() {
 	serviceName := viper.GetString("user.service-name")
 	fmt.Printf("current service name : %s \n", serviceName)
+	// 1.service/application.go
+	// 2.app/app.go  command/query.go
+	// 3.common/decorator/query.go   logging.go
+	// 4.app/command/query.go 的 handle
+	// 5.http.go
 	application := service.NewApplication()
 
 	//application := app.NewApplication()

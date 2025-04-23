@@ -32,7 +32,7 @@ func NewGetDeepSeekAnswerHandler(
 	return decorator.ApplyQueryDecorators[GetDeepSeekAnswer, *domain.User](getDeepSeekAnswerHandler{userRepo: userRepo}, logger)
 }
 
-// 先调用日志 handle 再调用 这里的handle
+// 先调用日志 handle 再调用 这里的handle,  在调用 user_inmem_repository 的get
 func (g getDeepSeekAnswerHandler) Handle(ctx context.Context, query GetDeepSeekAnswer) (*domain.User, error) {
 	u, err := g.userRepo.Get(ctx, query.Problem)
 	if err != nil {

@@ -19,10 +19,18 @@ type HTTPServer struct {
 	app app.Application
 }
 
-func (h HTTPServer) GetDeepSeekAnswer(c *gin.Context) {
+func (h HTTPServer) GetDeepSeekAnswer(c *gin.Context, problem string) {
 	//TODO
-	logrus.Info("To do somethings")
-	h.app.Queries.GetDeepSeekAnswer.Handle(c, query.GetDeepSeekAnswer{Problem: "test"})
+	logrus.Info("To do somethings", problem)
+	o, err := h.app.Queries.GetDeepSeekAnswer.Handle(c, query.GetDeepSeekAnswer{Problem: problem})
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"error": err})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data":    o,
+	})
 }
 
 type Request struct {
