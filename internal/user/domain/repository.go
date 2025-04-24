@@ -6,13 +6,13 @@ import (
 )
 
 type Repository interface {
-	Get(ctx context.Context, problem string) (*User, error)
+	Post(ctx context.Context, model string) (*User, error)
 }
 
 type NotFound struct {
-	Problem string
+	Model string
 }
 
 func (n NotFound) Error() string {
-	return fmt.Sprintf("Wrong question %s asked", n.Problem)
+	return fmt.Sprintf("Wrong question %s asked", n.Model)
 }

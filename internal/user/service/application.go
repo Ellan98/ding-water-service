@@ -17,7 +17,7 @@ func newApplication() app.Application {
 	logger := logrus.NewEntry(logrus.StandardLogger())
 	return app.Application{
 		Queries: app.Queries{
-			GetDeepSeekAnswer: query.NewGetDeepSeekAnswerHandler(userRepo, logger),
+			PostDeepSeekAnswer: query.NewPostDeepSeekAnswerHandler(userRepo, logger),
 		},
 	}
 }

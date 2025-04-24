@@ -1,8 +1,11 @@
 package domain
 
-//贫血模型 状态
+// 贫血模型 状态
 type User struct {
-	Problem string
+	Model           string
+	Prompt          string
+	SearchEnabled   bool
+	ThinkingEnabled bool
 }
 
 /*
