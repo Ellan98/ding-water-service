@@ -32,6 +32,9 @@ func (h HTTPServer) GetDeepSeekAnswer(c *gin.Context, problem string) {
 		"data":    o,
 	})
 }
+func (h HTTPServer) PostChatCompletion() {
+	//TODO Something
+}
 
 type Request struct {
 	Message string `json:"message"`
