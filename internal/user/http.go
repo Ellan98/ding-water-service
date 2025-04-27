@@ -32,8 +32,17 @@ func (h HTTPServer) GetDeepSeekAnswer(c *gin.Context, problem string) {
 		"data":    o,
 	})
 }
-func (h HTTPServer) PostChatCompletion() {
+func (h HTTPServer) PostChatCompletion(c *gin.Context, problem string) {
+	o, err := h.app.Queries.PostChatCompletion.Handle(c, query.PostChatCompletion{Problem: problem})
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"error": err,
+		})
+	}
 	//TODO Something
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+	})
 }
 
 type Request struct {
