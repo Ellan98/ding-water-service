@@ -9,32 +9,33 @@ import (
 )
 
 // 请求模型
-type GetDeepSeekAnswer struct {
-	Problem string
+type PostChatCompletion struct {
+	Model string
 }
 
-type GetDeepSeekAnswerHandler decorator.QueryHandler[GetDeepSeekAnswer, *domain.User]
+type PostChatCompletionHandler decorator.QueryHandler[PostChatCompletion, *domain.User]
 
 // 应用服务层 依赖于 domain.Repository 接口
-type getDeepSeekAnswerHandler struct {
+type postChatCompletionHandler struct {
 	userRepo domain.Repository
 }
 
 // 在service 文件中 进行注入
-func NewGetDeepSeekAnswerHandler(
+func NewPostChatCompletionHandler(
 	userRepo domain.Repository,
 	logger *logrus.Entry,
 
-) GetDeepSeekAnswerHandler {
+) PostChatCompletionHandler {
 	if userRepo == nil {
 		panic("nil userRepo")
 	}
-	return decorator.ApplyQueryDecorators[GetDeepSeekAnswer, *domain.User](getDeepSeekAnswerHandler{userRepo: userRepo}, logger)
+	return decorator.ApplyQueryDecorators[PostChatCompletion, *domain.User](postChatCompletionHandler{userRepo: userRepo}, logger)
 }
 
 // 先调用日志 handle 再调用 这里的handle,  在调用 user_inmem_repository 的get
-func (g getDeepSeekAnswerHandler) Handle(ctx context.Context, query GetDeepSeekAnswer) (*domain.User, error) {
-	u, err := g.userRepo.Get(ctx, query.Problem)
+func (g postChatCompletionHandler) Handle(ctx context.Context, query PostChatCompletion) (*domain.User, error) {
+	u, err := g.userRepo.Post(ctx, query.Model)
+	logrus.Debug("------", u)
 	if err != nil {
 		return nil, err
 	}

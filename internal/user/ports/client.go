@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type GinServerOptions struct {
@@ -18,8 +19,8 @@ type ServerInterface interface {
 	// (POST /customer/{customerID}/orders)
 	// PostCustomerCustomerIDOrders(c *gin.Context, customerID string)
 
-	// (GET /customer/{customerID}/orders/{orderID})
-	PostChatCompletion(c *gin.Context, problem string)
+	//chat/{model}/completion
+	PostChatCompletion(c *gin.Context, model string)
 	// Get(c *gin.Context, problem string)completion
 }
 
@@ -45,13 +46,23 @@ type ServerInterfaceWrapper struct {
 
 func (siw *ServerInterfaceWrapper) PostChatCompletion(c *gin.Context) {
 
-	problem := c.Param("problem")
-	if problem == "" {
-		siw.ErrorHandler(c, errors.New("Missing or empty path parameter: problem"), http.StatusBadRequest)
+	//Param 查询 路径参数
+	model := c.Param("model")
+	//Query 查询？后参数
+	// id := c.Query("id")
+	//PostForm 查询 post请求携带数据
+	// c.PostForm("id")
+	var postChatCompletionRequest PostChatCompletionRequest
+	c.ShouldBind(&postChatCompletionRequest)
+
+	logrus.Infof("---------question: %+v--------------", postChatCompletionRequest)
+
+	if model == "" {
+		siw.ErrorHandler(c, errors.New("Missing or empty path parameter: model"), http.StatusBadRequest)
 		return
 	}
 
-	siw.Handler.PostChatCompletion(c, problem)
+	siw.Handler.PostChatCompletion(c, model)
 }
 
 func RegisterHandlersWithOptions(router *gin.Engine, server ServerInterface, options GinServerOptions) {
@@ -62,7 +73,7 @@ func RegisterHandlersWithOptions(router *gin.Engine, server ServerInterface, opt
 	}
 	// fmt.Print(wrapper)
 	// router.POST(options.BaseURL+"/customer/:customerID/orders", wrapper.PostCustomerCustomerIDOrders)
-	router.POST(options.BaseURL+"/chat/completion", wrapper.PostChatCompletion)
+	router.POST(options.BaseURL+"/chat/:model/completion", wrapper.PostChatCompletion)
 }
 
 // {chat_session_id: "5c949655-39cb-4219-98c7-2ac39df533b9", parent_message_id: null,…}

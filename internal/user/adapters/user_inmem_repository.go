@@ -16,7 +16,7 @@ type MemoryUserRepository struct {
 func NewMemoryUserRepository() *MemoryUserRepository {
 	s := make([]*domain.User, 0)
 	s = append(s, &domain.User{
-		Problem: "hello world ",
+		Model: "hello world ",
 	})
 	return &MemoryUserRepository{
 		lock:  &sync.RWMutex{},
@@ -24,17 +24,18 @@ func NewMemoryUserRepository() *MemoryUserRepository {
 	}
 }
 
-func (m MemoryUserRepository) Get(ctx context.Context, problem string) (*domain.User, error) {
+// 考虑 这个方向 构造 deepSeek 请求
+func (m MemoryUserRepository) Post(ctx context.Context, model string) (*domain.User, error) {
 	for i, v := range m.store {
 		logrus.Infof("m.store[%d] = %+v", i, v)
 	}
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 	for _, o := range m.store {
-		if o.Problem != "" {
+		if o.Model != "" {
 			return o, nil
 		}
 	}
-	return nil, domain.NotFound{Problem: problem}
+	return nil, domain.NotFound{Model: model}
 
 }

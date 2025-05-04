@@ -9,31 +9,18 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Ellan98/ding-water-service/user/app"
 	"github.com/Ellan98/ding-water-service/user/app/command/query"
+
+	"github.com/Ellan98/ding-water-service/user/app"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 type HTTPServer struct {
 	app app.Application
 }
 
-func (h HTTPServer) GetDeepSeekAnswer(c *gin.Context, problem string) {
-	//TODO
-	logrus.Info("To do somethings", problem)
-	o, err := h.app.Queries.GetDeepSeekAnswer.Handle(c, query.GetDeepSeekAnswer{Problem: problem})
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"error": err})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"data":    o,
-	})
-}
-func (h HTTPServer) PostChatCompletion(c *gin.Context, problem string) {
-	o, err := h.app.Queries.PostChatCompletion.Handle(c, query.PostChatCompletion{Problem: problem})
+func (h HTTPServer) PostChatCompletion(c *gin.Context, model string) {
+	o, err := h.app.Queries.PostChatCompletion.Handle(c, query.PostChatCompletion{Model: model})
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"error": err,
@@ -42,6 +29,7 @@ func (h HTTPServer) PostChatCompletion(c *gin.Context, problem string) {
 	//TODO Something
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
+		"data":    o,
 	})
 }
 
