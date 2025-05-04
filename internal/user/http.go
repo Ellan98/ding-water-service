@@ -3,13 +3,10 @@ package main
 // go-backend/main.go
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
-	"net/http"
-	"os"
-
+	"context"
 	"github.com/Ellan98/ding-water-service/user/app/command/query"
+	"github.com/sirupsen/logrus"
+	"net/http"
 
 	"github.com/Ellan98/ding-water-service/user/app"
 	"github.com/gin-gonic/gin"
@@ -20,7 +17,12 @@ type HTTPServer struct {
 }
 
 func (h HTTPServer) PostChatCompletion(c *gin.Context, model string) {
-	o, err := h.app.Queries.PostChatCompletion.Handle(c, query.PostChatCompletion{Model: model})
+	key := "PostChatCompletionRequest"
+	val, _ := c.Get(key)
+	logrus.Debugf("should bind params %+v", val)
+	ctx := context.WithValue(c.Request.Context(), "PostChatCompletionRequest", val)
+	//*gin.Context 当作普通的 context.Context 使用了，编译没问题，但失去了 *gin.Context 的所有方法，包括 ShouldBind()。
+	o, err := h.app.Queries.PostChatCompletion.Handle(ctx, query.PostChatCompletion{Model: model, Key: key})
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"error": err,
@@ -31,81 +33,4 @@ func (h HTTPServer) PostChatCompletion(c *gin.Context, model string) {
 		"message": "success",
 		"data":    o,
 	})
-}
-
-type Request struct {
-	Message string `json:"message"`
-}
-
-type DeepSeekRequest struct {
-	Model    string `json:"model"`
-	Messages []struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
-	} `json:"messages"`
-}
-
-type DeepSeekResponse struct {
-	Choices []struct {
-		Message struct {
-			Content string `json:"content"`
-		} `json:"message"`
-	} `json:"choices"`
-}
-
-func chatHandler(c *gin.Context) {
-	// 解析前端请求
-	// var req Request
-	// if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
-
-	// 构造DeepSeek请求
-	deepSeekReq := DeepSeekRequest{
-		Model: "deepseek-chat",
-		Messages: []struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		}{
-			{Role: "user", Content: "api test"},
-		},
-	}
-
-	reqBody, _ := json.Marshal(deepSeekReq)
-
-	// 创建HTTP客户端
-	client := &http.Client{}
-	apiReq, _ := http.NewRequest(
-		"POST",
-		"https://api.deepseek.com/v1/chat/completions",
-		bytes.NewBuffer(reqBody),
-	)
-
-	apiReq.Header.Set("Authorization", "Bearer "+os.Getenv("DING_WATER_SERVICE_DEEPSEEK_KEY"))
-	apiReq.Header.Set("Content-Type", "application/json")
-
-	// 发送请求
-	resp, err := client.Do(apiReq)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "error",
-		})
-		return
-	}
-	defer resp.Body.Close()
-
-	// 处理响应
-	body, _ := io.ReadAll(resp.Body)
-	var deepSeekResp DeepSeekResponse
-	json.Unmarshal(body, &deepSeekResp)
-
-	response := map[string]string{
-		"reply": deepSeekResp.Choices[0].Message.Content,
-	}
-	c.JSON(http.StatusInternalServerError, gin.H{
-		"message": "error",
-		"data":    response,
-	})
-	// json.NewEncoder(w).Encode(response)
 }

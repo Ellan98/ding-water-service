@@ -11,6 +11,7 @@ import (
 // 请求模型
 type PostChatCompletion struct {
 	Model string
+	Key   string
 }
 
 type PostChatCompletionHandler decorator.QueryHandler[PostChatCompletion, *domain.User]
@@ -24,7 +25,6 @@ type postChatCompletionHandler struct {
 func NewPostChatCompletionHandler(
 	userRepo domain.Repository,
 	logger *logrus.Entry,
-
 ) PostChatCompletionHandler {
 	if userRepo == nil {
 		panic("nil userRepo")
@@ -34,7 +34,7 @@ func NewPostChatCompletionHandler(
 
 // 先调用日志 handle 再调用 这里的handle,  在调用 user_inmem_repository 的get
 func (g postChatCompletionHandler) Handle(ctx context.Context, query PostChatCompletion) (*domain.User, error) {
-	u, err := g.userRepo.Post(ctx, query.Model)
+	u, err := g.userRepo.Post(ctx, query.Model, query.Key)
 	logrus.Debug("------", u)
 	if err != nil {
 		return nil, err

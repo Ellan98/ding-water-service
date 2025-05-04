@@ -53,9 +53,13 @@ func (siw *ServerInterfaceWrapper) PostChatCompletion(c *gin.Context) {
 	//PostForm 查询 post请求携带数据
 	// c.PostForm("id")
 	var postChatCompletionRequest PostChatCompletionRequest
-	c.ShouldBind(&postChatCompletionRequest)
-
-	logrus.Infof("---------question: %+v--------------", postChatCompletionRequest)
+	if err := c.ShouldBind(&postChatCompletionRequest); err != nil {
+		siw.ErrorHandler(c, errors.New("Missing or empty  parameter: postChatCompletionRequest"), http.StatusBadRequest)
+		return
+	}
+	logrus.Debugf("query should bind params %+v", postChatCompletionRequest)
+	//在上下文中临时存储自定义键值对，以便在请求的生命周期中 使用。 后续通过Get获取
+	c.Set("PostChatCompletionRequest", postChatCompletionRequest)
 
 	if model == "" {
 		siw.ErrorHandler(c, errors.New("Missing or empty path parameter: model"), http.StatusBadRequest)

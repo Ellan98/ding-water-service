@@ -6,7 +6,7 @@ import (
 )
 
 type Repository interface {
-	Post(ctx context.Context, model string) (*User, error)
+	Post(ctx context.Context, model string, key string) (*User, error)
 }
 
 type NotFound struct {
