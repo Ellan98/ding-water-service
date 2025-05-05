@@ -31,6 +31,6 @@ func (h HTTPServer) PostChatCompletion(c *gin.Context, model string) {
 	//TODO Something
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
-		"data":    o,
+		"data":    o.Reply,
 	})
 }

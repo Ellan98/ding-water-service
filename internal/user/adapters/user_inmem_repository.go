@@ -5,8 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/Ellan98/ding-water-service/user/ports"
-	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
 	"os"
@@ -48,12 +48,13 @@ func (m MemoryUserRepository) Post(ctx context.Context, model, paramsKey string)
 	//		return o, nil
 	//	}
 	//}
-	if reply, err := chatHandler(ctx, &domain.User{
+	reply, err := chatHandler(&domain.User{
 		Model:           model,
 		Prompt:          val.Prompt,
 		SearchEnabled:   val.SearchEnabled,
 		ThinkingEnabled: val.ThinkingEnabled,
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, domain.NotFound{Model: model}
 	}
 
@@ -61,14 +62,19 @@ func (m MemoryUserRepository) Post(ctx context.Context, model, paramsKey string)
 
 }
 
-type DeepSeekRequest struct {
-	Model    string `json:"model"`
-	Messages []struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
-	} `json:"messages"`
+// 定义 Message 结构体
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
+// 定义 DeepSeekRequest 结构体
+type DeepSeekRequest struct {
+	Model    string    `json:"model"`
+	Messages []Message `json:"messages"` // 使用 Message 类型切片
+}
+
+// 定义 DeepSeekResponse 结构体
 type DeepSeekResponse struct {
 	Choices []struct {
 		Message struct {
@@ -77,61 +83,67 @@ type DeepSeekResponse struct {
 	} `json:"choices"`
 }
 
-func chatHandler(c *gin.Context, params *domain.User) (reply *domain.User, err error) {
-	// 解析前端请求
-	// var req Request
-	// if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
-
-	// 构造DeepSeek请求
+// 1. 这里函数的参数 类型 是指针类型，所以去要&获取地址
+// 2. 在这个函数体内 go 会自动根据地址进行解引用 例如 params.Reply = "respones something"
+// 3. 如果返回指针类型的参数 ，不需要再使用&进行取地址了
+func chatHandler(params *domain.User) (*domain.User, error) {
+	if params == nil {
+		return nil, errors.New("params is nil")
+	}
+	// 构造请求体
 	deepSeekReq := DeepSeekRequest{
-		Model: "deepseek-chat",
-		Messages: []struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		}{
-			{Role: "user", Content: params.Prompt},
-		},
+		Model:    "deepseek-chat",
+		Messages: []Message{{Role: "user", Content: params.Prompt}},
 	}
 
-	reqBody, _ := json.Marshal(deepSeekReq)
+	// 编码请求体
+	reqBody, err := json.Marshal(deepSeekReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request body: %w", err)
+	}
 
-	// 创建HTTP客户端
-	client := &http.Client{}
-	apiReq, _ := http.NewRequest(
+	// 创建 HTTP 请求
+	apiReq, err := http.NewRequest(
 		"POST",
 		"https://api.deepseek.com/v1/chat/completions",
 		bytes.NewBuffer(reqBody),
 	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
+	}
 
 	apiReq.Header.Set("Authorization", "Bearer "+os.Getenv("DING_WATER_SERVICE_DEEPSEEK_KEY"))
 	apiReq.Header.Set("Content-Type", "application/json")
 
-	// 发送请求
+	// 执行 HTTP 请求
+	client := &http.Client{}
 	resp, err := client.Do(apiReq)
 	if err != nil {
-
-		return nil, errors.New("request fiald")
+		return nil, fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
-	// 处理响应
-	body, _ := io.ReadAll(resp.Body)
+	// 读取响应体
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+	logrus.Debug("------------2222--------------------", string(body))
+
+	// 解析响应
 	var deepSeekResp DeepSeekResponse
-	json.Unmarshal(body, &deepSeekResp)
+	if err := json.Unmarshal(body, &deepSeekResp); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
 
-	//response := map[string]string{
-	//	"reply": deepSeekResp.Choices[0].Message.Content,
-	//}
+	if len(deepSeekResp.Choices) == 0 {
+		return nil, errors.New("no choices returned from deepseek")
+	}
 
-	//reply = response["reply"]
+	logrus.Debugf("------------1111-------------------- %+v", deepSeekResp)
+	// 填充 Reply 字段
 	params.Reply = deepSeekResp.Choices[0].Message.Content
+	logrus.Debugf("deepSeek Response: %s", params.Reply)
 	return params, nil
-	//c.JSON(http.StatusInternalServerError, gin.H{
-	//	"message": "error",
-	//	"data":    response,
-	//})
-	// json.NewEncoder(w).Encode(response)
+
 }

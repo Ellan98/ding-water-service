@@ -4,7 +4,7 @@ package domain
 type User struct {
 	Model           string
 	Prompt          string
-	reply           string
+	Reply           string
 	SearchEnabled   bool
 	ThinkingEnabled bool
 }
