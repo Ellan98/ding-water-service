@@ -9,7 +9,6 @@ import (
 	"github.com/Ellan98/ding-water-service/user/ports"
 	"io"
 	"net/http"
-	"os"
 	"sync"
 
 	"github.com/Ellan98/ding-water-service/user/domain"
@@ -112,7 +111,9 @@ func chatHandler(params *domain.User) (*domain.User, error) {
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 
-	apiReq.Header.Set("Authorization", "Bearer "+os.Getenv("DING_WATER_SERVICE_DEEPSEEK_KEY"))
+	//apiReq.Header.Set("Authorization", "Bearer "+os.Getenv("DING_WATER_SERVICE_DEEPSEEK_KEY"))
+	apiReq.Header.Set("Authorization", "Bearer ")
+
 	apiReq.Header.Set("Content-Type", "application/json")
 
 	// 执行 HTTP 请求
@@ -135,6 +136,7 @@ func chatHandler(params *domain.User) (*domain.User, error) {
 	if err := json.Unmarshal(body, &deepSeekResp); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
+	logrus.Debugf("out bind struct response %+v", deepSeekResp)
 
 	if len(deepSeekResp.Choices) == 0 {
 		return nil, errors.New("no choices returned from deepseek")

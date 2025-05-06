@@ -52,6 +52,7 @@ func (siw *ServerInterfaceWrapper) PostChatCompletion(c *gin.Context) {
 	// id := c.Query("id")
 	//PostForm 查询 post请求携带数据
 	// c.PostForm("id")
+	//shouldBind 绑定并校验请求参数。     tips：为了通用型、复用性 绑定并校验参数应该放到 http.go文件中 对应的方法中
 	var postChatCompletionRequest PostChatCompletionRequest
 	if err := c.ShouldBind(&postChatCompletionRequest); err != nil {
 		siw.ErrorHandler(c, errors.New("Missing or empty  parameter: postChatCompletionRequest"), http.StatusBadRequest)
