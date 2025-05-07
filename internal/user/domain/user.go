@@ -1,5 +1,9 @@
 package domain
 
+import (
+	"time"
+)
+
 // 贫血模型 状态
 type User struct {
 	Model           string
@@ -28,3 +32,24 @@ type User struct {
 				return nil
 			}
 */
+
+type Profile struct {
+	//账户
+	Account string
+	//性别 1:女 2:男
+	Gender string
+	//邮箱
+	Email string
+	//密码
+	PassWord string
+	//账户状态
+	State string
+	//昵称
+	Nickame string
+	//出生日期
+	Brithday time.Time
+	//注册日期
+	RegistDate time.Time
+	//是否在线
+	Online int
+}
